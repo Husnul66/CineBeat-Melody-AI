@@ -2,6 +2,17 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from app.core.config import settings
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
+from dotenv import load_dotenv
+
+load_dotenv() 
+
+def send_contact_notification_sync(sender_name: str, sender_email: str, message_body: str):
+    """İletişim formundan gelen mesajları adminin kendi e-postasına yönlendirir."""
+    admin_email = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_PASSWORD")
 
 def send_weekly_newsletter_sync(to_email: str, movies: list, music: list):
     """Arka planda çalışarak kullanıcıya interaktif link içeren HTML bülten gönderir."""
@@ -76,3 +87,74 @@ def send_weekly_newsletter_sync(to_email: str, movies: list, music: list):
             print(f"[E-Posta] {to_email} adresine interaktif bülten başarıyla iletildi.")
     except Exception as e:
         print(f"[E-Posta Hatası] {e}")
+
+
+def send_contact_notification_sync(sender_name: str, sender_email: str, message_body: str):
+    """İletişim formundan gelen mesajları adminin kendi e-postasına yönlendirir."""
+    admin_email = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    if not admin_email or not smtp_password:
+        print("HATA: SMTP ayarları .env dosyasında bulunamadı.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = admin_email
+    msg['To'] = admin_email # Mesajı kendi kendimize (admine) gönderiyoruz
+    msg['Subject'] = f"Yeni İletişim Mesajı: {sender_name}"
+
+    body = f"""
+    Sitenizden yeni bir iletişim formu dolduruldu:
+
+    Kimden: {sender_name}
+    E-Posta: {sender_email}
+    
+    Mesaj:
+    {message_body}
+    """
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(admin_email, smtp_password)
+        server.send_message(msg)
+        server.quit()
+        print("İletişim mesajı admin e-postasına başarıyla iletildi.")
+    except Exception as e:
+        print(f"E-posta gönderim hatası: {e}")        
+
+def send_subscription_email_sync(user_email: str):
+    """Yeni aboneye hoş geldin e-postası gönderir."""
+    admin_email = os.getenv("SMTP_EMAIL")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    if not admin_email or not smtp_password:
+        print("HATA: SMTP ayarları bulunamadı.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = admin_email
+    msg['To'] = user_email  # Alıcı, forma e-postasını yazan ziyaretçi
+    msg['Subject'] = "CineBeat & Melody AI Bültenine Hoş Geldiniz! 🎬🎵"
+
+    body = """
+    Merhaba!
+
+    Haftalık trend filmler ve müzikler bültenimize başarıyla abone oldunuz.
+    En popüler içerikleri ve yapay zeka analizlerini her hafta sizinle paylaşacağız.
+
+    Görüşmek üzere,
+    CineBeat & Melody AI Ekibi
+    """
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(admin_email, smtp_password)
+        server.send_message(msg)
+        server.quit()
+        print(f"Bülten e-postası başarıyla gönderildi: {user_email}")
+    except Exception as e:
+        print(f"Bülten e-postası gönderim hatası: {e}")        

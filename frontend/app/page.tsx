@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
+import Contact from "@/components/Contact";
 
 export default function Home() {
   const [movies, setMovies] = useState<any[]>([]);
@@ -195,6 +196,7 @@ export default function Home() {
         
         {/* Modüler Bileşenleri Ekledik */}
         <Newsletter />
+        <Contact />
       </div>
 
       <Footer />

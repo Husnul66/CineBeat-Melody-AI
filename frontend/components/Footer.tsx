@@ -1,10 +1,10 @@
 // İleride Admin Panelinden veya veritabanından çekilebilir
 const adminConfig = {
-  phone: "+90 555 123 45 67",
-  email: "iletisim@cinebeat.com",
-  whatsapp: "https://wa.me/905551234567",
-  telegram: "https://t.me/cinebeat",
-  youtube: "https://youtube.com/@cinebeat"
+  phone: process.env.NEXT_PUBLIC_PHONE || "",
+  email: process.env.NEXT_PUBLIC_EMAIL || "",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "",
+  telegram: process.env.NEXT_PUBLIC_TELEGRAM || "",
+  youtube: process.env.NEXT_PUBLIC_YOUTUBE || ""
 };
 
 export default function Footer() {

@@ -9,6 +9,9 @@ from app.api.deps import get_current_user
 from app.api.services.data_sync import sync_movies_to_db, sync_music_to_db
 from app.api.services.ai_service import generate_media_review, match_mood_with_media
 from app.api.services.email_service import send_weekly_newsletter_sync
+from app.api.services.email_service import send_contact_notification_sync
+from app.api.services.email_service import send_contact_notification_sync, send_subscription_email_sync
+
 
 router = APIRouter()
 
@@ -19,6 +22,11 @@ class MoodRequest(BaseModel):
 # Abonelik isteği için veri modeli (Sadece E-posta)
 class SubscribeRequest(BaseModel):
     email: EmailStr
+
+class ContactRequest(BaseModel):
+    name: str
+    email: EmailStr
+    message: str
 
 @router.post("/sync")
 async def sync_media_data(current_user: User = Depends(get_current_user)):
@@ -88,9 +96,30 @@ async def subscribe_newsletter(
         movies=popular_movies,
         music=popular_music
     )
+    background_tasks.add_task(send_subscription_email_sync, user_email=request.email)
 
     return {
         "message": "Harika! Haftalık bültenimize başarıyla abone oldunuz. İlk trend listemiz e-postanıza gönderiliyor.",
         "recipient": request.email,
         "status": "queued"
+    }
+
+@router.post("/contact")
+async def send_contact_message(
+    request: ContactRequest, 
+    background_tasks: BackgroundTasks
+):
+    """Kullanıcılardan gelen iletişim mesajlarını alır ve e-posta gönderir."""
+    
+    # Kullanıcıyı bekletmemek için e-posta gönderme işini arka plana atıyoruz
+    background_tasks.add_task(
+        send_contact_notification_sync,
+        sender_name=request.name,
+        sender_email=request.email,
+        message_body=request.message
+    )
+    
+    return {
+        "status": "success",
+        "message": "Mesajınız başarıyla alındı. En kısa sürede size dönüş yapacağız!"
     }
