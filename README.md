@@ -58,6 +58,22 @@ pip install -r requirements.txt
 Ortam Değişkenleri (.env):
 backend klasörü içine .env adında bir dosya oluşturun ve API anahtarlarınızı ekleyin:
 
+MONGODB_URI=mongodb+srv://<kullanici_adi>:<sifre>@cluster.mongodb.net/
+GEMINI_API_KEY=senin_gemini_anahtarin
+TMDB_BEARER_TOKEN=senin_tmdb_v4_read_access_token
+SMTP_EMAIL=senin_mail_adresin@gmail.com
+SMTP_PASSWORD=uygulama_sifren
+
+Sunucuyu Başlatma:
+
+python -m uvicorn app.main:app --reload
+
+Frontend Kurulumu
+
+Yeni bir terminal açın ve frontend klasörüne geçin:
+cd frontend
+npm install
+npm run dev
 
 
 
