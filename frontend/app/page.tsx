@@ -1,18 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Newsletter from "@/components/Newsletter";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const [movies, setMovies] = useState<any[]>([]);
   const [music, setMusic] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Yapay zeka ve input state'leri
   const [mood, setMood] = useState("");
   const [aiResult, setAiResult] = useState<any>(null);
   const [syncLoading, setSyncLoading] = useState(false);
 
-  // Sayfa yüklendiğinde FastAPI'den verileri çeker
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,7 +36,6 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Ruh hali eşleştirme fonksiyonu
   const handleMoodSync = async () => {
     if (!mood.trim()) return;
     setSyncLoading(true);
@@ -58,10 +57,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-50 p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-slate-900 text-slate-50 font-sans flex flex-col">
+      <div className="max-w-6xl mx-auto p-8 flex-grow">
         
-        {/* Kahraman (Hero) Bölümü */}
         <div className="text-center py-16">
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 mb-6 drop-shadow-lg">
             CineBeat & Melody AI
@@ -70,7 +68,6 @@ export default function Home() {
             Sadece ne izleyeceğini veya dinleyeceğini değil, <br className="hidden md:block" /> nasıl hissedeceğini seç.
           </p>
           
-          {/* Mood Sync Bar */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-2xl mx-auto">
             <input 
               type="text" 
@@ -89,7 +86,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Yapay Zeka Sonuç Kutusu */}
           {aiResult && !aiResult.error && (
             <div className="mt-10 p-8 bg-gradient-to-br from-indigo-900 to-slate-800 rounded-3xl border border-indigo-500/50 shadow-2xl max-w-3xl mx-auto text-left transform transition-all duration-500 hover:scale-[1.02]">
               <h3 className="text-2xl font-bold text-indigo-300 mb-4 flex items-center gap-2">
@@ -100,12 +96,9 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col md:flex-row gap-4 justify-between">
-                
-                {/* Tıklanabilir Film Kartı (Düzeltildi - Referrer Koruması Aşıldı) */}
                 {(() => {
                   const foundMovie = movies.find(m => m.title.toLowerCase().includes(aiResult.movie_title.toLowerCase()) || aiResult.movie_title.toLowerCase().includes(m.title.toLowerCase()));
                   const movieId = foundMovie?._id;
-                  
                   return (
                     <Link 
                       href={movieId ? `/media/${movieId}` : `https://www.fullhdfilmizlesene.now/arama/${encodeURIComponent(aiResult.movie_title)}`} 
@@ -121,11 +114,9 @@ export default function Home() {
                   );
                 })()}
 
-                {/* Tıklanabilir Müzik Kartı (Düzeltildi - Referrer Koruması Aşıldı) */}
                 {(() => {
                   const foundMusic = music.find(m => m.title.toLowerCase().includes(aiResult.music_title.toLowerCase()) || aiResult.music_title.toLowerCase().includes(m.title.split(' - ')[0].toLowerCase()));
                   const musicId = foundMusic?._id;
-                  
                   return (
                     <Link 
                       href={musicId ? `/media/${musicId}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(aiResult.music_title)}`} 
@@ -140,7 +131,6 @@ export default function Home() {
                     </Link>
                   );
                 })()}
-
               </div>
             </div>
           )}
@@ -152,15 +142,12 @@ export default function Home() {
           )}
         </div>
 
-        {/* Veriler Yüklenirken veya Gösterilirken (Ana Liste) */}
         {loading ? (
           <div className="text-center text-slate-400 py-10 animate-pulse">
             İçerikler yükleniyor...
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
-            
-            {/* Filmler */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-20">
             <div>
               <h2 className="text-3xl font-bold mb-6 flex items-center gap-2 text-rose-400">
                 🎬 Popüler Filmler
@@ -183,7 +170,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Müzikler */}
             <div>
               <h2 className="text-3xl font-bold mb-6 flex items-center gap-2 text-emerald-400">
                 🎵 Trend Müzikler
@@ -204,10 +190,14 @@ export default function Home() {
                 )) : <p className="text-slate-500">Kayıtlı müzik bulunamadı.</p>}
               </div>
             </div>
-
           </div>
         )}
+        
+        {/* Modüler Bileşenleri Ekledik */}
+        <Newsletter />
       </div>
+
+      <Footer />
     </main>
   );
 }

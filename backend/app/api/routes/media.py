@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from beanie import PydanticObjectId
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from app.models.media import Media, MediaType
 from app.models.user import User
@@ -15,6 +15,10 @@ router = APIRouter()
 # Ruh hali isteği için veri modeli
 class MoodRequest(BaseModel):
     mood: str
+
+# Abonelik isteği için veri modeli (Sadece E-posta)
+class SubscribeRequest(BaseModel):
+    email: EmailStr
 
 @router.post("/sync")
 async def sync_media_data(current_user: User = Depends(get_current_user)):
@@ -67,27 +71,26 @@ async def get_ai_comment(media_id: PydanticObjectId, current_user: User = Depend
         "ai_comment": comment
     }
 
-@router.post("/send-newsletter")
-async def send_newsletter(
-    background_tasks: BackgroundTasks,
-    target_email: Optional[str] = Query(None, description="Bültenin iletileceği e-posta adresi"),
-    current_user: User = Depends(get_current_user)
+@router.post("/subscribe")
+async def subscribe_newsletter(
+    request: SubscribeRequest,
+    background_tasks: BackgroundTasks
 ):
-    """Kullanıcının belirttiği veya oturum açtığı adrese arka planda bülten gönderir."""
-    recipient = target_email if target_email else current_user.email
-
+    """Kullanıcının e-postasını alır ve haftalık bülteni arka planda gönderir (Herkese Açık)."""
+    
     popular_movies = await Media.find(Media.media_type == MediaType.MOVIE).limit(3).to_list()
     popular_music = await Media.find(Media.media_type == MediaType.MUSIC).limit(3).to_list()
 
+    # E-posta gönderme işlemini arka plana (BackgroundTasks) atıyoruz ki kullanıcı beklememiş olsun
     background_tasks.add_task(
         send_weekly_newsletter_sync,
-        to_email=recipient,
+        to_email=request.email,
         movies=popular_movies,
         music=popular_music
     )
 
     return {
-        "message": "Bülten gönderimi arka planda başlatıldı.",
-        "recipient": recipient,
+        "message": "Harika! Haftalık bültenimize başarıyla abone oldunuz. İlk trend listemiz e-postanıza gönderiliyor.",
+        "recipient": request.email,
         "status": "queued"
     }
