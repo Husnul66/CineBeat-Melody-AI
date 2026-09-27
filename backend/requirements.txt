@@ -3,9 +3,16 @@ uvicorn
 motor
 beanie
 pymongo
+dnspython
+pydantic
+pydantic-settings
 pydantic[email]
+email-validator
 python-dotenv
 google-generativeai
 requests
 httpx
-pydantic-settings
+bcrypt
+PyJWT
+passlib[bcrypt]
+python-multipart
