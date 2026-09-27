@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+motor
+beanie
+pymongo
+pydantic[email]
+python-dotenv
+google-generativeai
+requests
+httpx
